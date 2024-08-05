@@ -14,11 +14,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class MailServiceImpl implements MailService
 {
-	private String from = "wjdwns9988@naver.com";  //보내는 사람 메일주소
+	private String from = "@naver.com";  //보내는 사람 메일주소
 	private String title = "인증코드 발송 메일입니다."; //메일 제목
 	private String body;  //메일 내용
-	private String id = "wjdwns9988";    //계정 아이디
-	private String pw = "486979long";    //계정 비밀번호
+	private String id = "";    //계정 아이디
+	private String pw = "";    //계정 비밀번호
 	
 	
 	//인증코드생성
