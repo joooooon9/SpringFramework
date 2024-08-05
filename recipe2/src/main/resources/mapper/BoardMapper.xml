@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- Namespace를 통해 JAVA 클래스와 Annotation클래스와 동기 -->
+<mapper namespace="com.test.mapper.BoardMapper">
+
+
+	<resultMap type="com.test.model.BoardVO" id="test">
+		<id property="bno" column="bno" />
+		<result property="title" column="title" />
+		<result property="userno" column="userno" />
+		<result property="subtitle" column="subtitle" />
+		<result property="serving" column="serving" />
+		<result property="cooktime" column="cooktime" />
+		<result property="ingredient" column="ingredient" />
+		<result property="content" column="content" />
+		<result property="isshare" column="isshare" />
+		<result property="wdate" column="wdate" />
+		
+		<collection property="fileVO" ofType="com.test.model.FileVO">
+			<id property="bno" column="bno" />
+			<result property="bpname" column="bpname" />
+			<result property="bfname" column="bfname" />
+		</collection>
+	</resultMap>
+
+	<insert id="insert"  parameterType="com.test.model.BoardVO"
+		useGeneratedKeys="true" 
+		keyProperty="bno">
+		insert into board (userno, title, subtitle, serving, cooktime, ingredient, content, isshare)
+		values (#{userno}, #{title}, #{subtitle}, #{serving}, #{cooktime}, #{ingredient}, #{content}, #{isshare}
+		)
+	</insert>
+	
+    <select id="selectbybno" parameterType="int" resultMap="test">
+        <!-- select userno, bno, title, subtitle, serving, cooktime, ingredient, content, isshare, wdate, bhit
+        from board
+        where bno = #{bno} -->
+        select b.*, f.* from board as b 
+       	left join file as f 
+       		on b.bno = f.bno where b.bno = #{bno}
+        
+    </select>
+    
+    <update id="update" parameterType="com.test.model.BoardVO">
+    	update board
+    		set  title= #{title}, subtitle= #{subtitle}, serving= #{serving}, cooktime= #{cooktime},
+    					 ingredient= #{ingredient}, content= #{content}, isshare= #{isshare}
+    		where bno = #{bno}
+    </update>
+    
+    <update id="delete" parameterType="int">
+        update board set delete_flag = 1
+        where bno = #{bno}
+    </update>
+    <!-- 공지작성 -->
+    <insert id="noticeinsert" parameterType="com.test.model.NoticeVO" useGeneratedKeys="true" 
+		keyProperty="notinum">
+    	insert into notice (userno,notinum,ntitle,ncontent) values(#{userno},#{notinum},#{ntitle},#{ncontent})
+    </insert>
+    
+    <select id="selectbynotinum" parameterType="int" resultType="com.test.model.NoticeVO">
+    	select notinum,ntitle,ncontent,date(nwdate) as nwdate,nhit,userno from notice
+    	where notinum = #{notinum}
+    </select>
+    <select id="getNoticeList" parameterType="java.lang.String" resultType="com.test.model.NoticeVO">
+    	select notinum,ntitle,ncontent,date(nwdate) as nwdate,nhit,userno from notice
+    </select>
+    <!-- 수정된 부분: userno 매개변수 추가 -->
+    <select id="getBoardList" parameterType="java.lang.String" resultType="com.test.model.BoardVO">
+        SELECT b.bno, b.userno, b.title, b.subtitle, b.serving, b.cooktime, b.ingredient, b.content, b.isshare, DATE(b.wdate) AS wdate, b.bhit,
+               u.userno AS 'user.userno', u.id AS 'user.id', u.nick AS 'user.nick', u.pw AS 'user.pw', u.name AS 'user.name', u.email AS 'user.email', u.joindate AS 'user.joindate', u.isretire AS 'user.isretire', u.isadmin AS 'user.isadmin'
+        FROM board b
+        JOIN user u ON b.userno = u.userno
+        WHERE b.userno = #{userno}
+        AND b.delete_flag = 0
+        ORDER BY b.wdate DESC
+    </select>
+    
+    <select id="getPublicBoardList" resultType="com.test.model.BoardVO">
+	    SELECT b.bno, b.userno, b.title, b.subtitle, b.serving, b.cooktime, b.ingredient, b.content, b.isshare, DATE(b.wdate) AS wdate, b.bhit,
+	           u.userno AS 'user.userno', u.id AS 'user.id', u.nick AS 'user.nick', u.pw AS 'user.pw', u.name AS 'user.name', u.email AS 'user.email', u.joindate AS 'user.joindate', u.isretire AS 'user.isretire', u.isadmin AS 'user.isadmin',
+	           (SELECT COUNT(*) FROM reply r WHERE r.bno = b.bno) AS rcount
+	    FROM board b
+	    JOIN user u ON b.userno = u.userno
+	    WHERE b.isshare = 'S'
+	    AND b.delete_flag = 0
+	    ORDER BY b.wdate DESC
+	    LIMIT 0, 6
+	</select>
+    
+<select id="getPublicBoardListWithPagination" parameterType="map" resultType="com.test.model.BoardVO">
+	    SELECT b.bno, b.userno, b.title, b.subtitle, b.serving, b.cooktime, b.ingredient, b.content, b.isshare, DATE(b.wdate) AS wdate, b.bhit,
+	           u.userno AS 'user.userno', u.id AS 'user.id', u.nick AS 'user.nick', u.pw AS 'user.pw', u.name AS 'user.name', u.email AS 'user.email', u.joindate AS 'user.joindate', u.isretire AS 'user.isretire', u.isadmin AS 'user.isadmin',
+	           (SELECT COUNT(*) FROM reply r WHERE r.bno = b.bno) AS rcount
+	    FROM board b
+	    JOIN user u ON b.userno = u.userno
+	    WHERE b.isshare = 'S'
+	    AND b.delete_flag = 0
+	    ORDER BY b.wdate DESC
+	    LIMIT #{offset}, #{limit}
+	</select>
+    
+    
+    <update id="bhit" parameterType="int">
+	    UPDATE board
+	    SET bhit = bhit + 1
+	    WHERE bno = #{bno}
+	</update>
+	
+	<update id="nhit" parameterType="int">
+	    UPDATE notice
+	    SET nhit = nhit + 1
+	    WHERE notinum = #{notinum}
+	</update>
+    
+</mapper>

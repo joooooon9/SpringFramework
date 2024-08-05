@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- Namespace를 통해 JAVA 클래스와 Annotation클래스와 동기 -->
+<mapper namespace="com.test.mapper.FileMapper">
+    <insert id="insert" parameterType="com.test.model.FileVO">
+        insert into file (bfname, bpname, bno)
+        values (#{bfname}, #{bpname}, #{bno})
+    </insert>
+
+    <select id="view" parameterType="int" resultType="com.test.model.FileVO">
+        select *
+        from file
+        where bno = #{bno}
+    </select>
+
+    <delete id="delete" parameterType="int">
+        delete from file where bno = #{bno}
+    </delete>
+
+    <update id="update" parameterType="com.test.model.FileVO">
+        update file
+        set bfname = #{bfname}, bpname = #{bpname}
+        where bno = #{bno}
+    </update>
+    
+    
+</mapper>

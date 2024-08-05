@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- Namespace를 통해 JAVA 클래스와 Annotation클래스와 동기 -->
+<mapper namespace="com.test.mapper.UserMapper">
+
+	<insert id="insertUser" parameterType="com.test.model.UserVO">
+		INSERT INTO user (id,
+		nick, pw, name, email)
+		VALUES (#{id}, #{nick}, md5(#{pw}), #{name},
+		#{email})
+	</insert>
+<!-- <insert id="insertUser" parameterType="com.test.model.UserVO">
+    	INSERT INTO user (id, nick, pw, name, email)
+    	VALUES (#{id}, #{nick}, SHA2(#{pw}, 256), #{name}, #{email})
+	</insert> -->
+
+	<select id="selectById" resultType="int" parameterType="String">
+		SELECT
+		COUNT(*)
+		FROM user
+		WHERE id = #{id}
+	</select>
+
+	<select id="selectByNick" resultType="int"
+		parameterType="String">
+		SELECT COUNT(*)
+		FROM user
+		WHERE nick = #{nick}
+	</select>
+
+	<select id="selectLogin" resultType="com.test.model.UserVO"
+		parameterType="com.test.model.UserVO">
+		SELECT userno
+		, id
+		, name
+		, nick
+		, bfname
+		, bpname
+		, email
+		, isadmin
+		, isretire
+		FROM user
+		WHERE id = #{id}
+		AND pw = md5(#{pw})
+	</select>
+	
+	<select id="selectByUser" parameterType="map" resultType="int">
+		SELECT COUNT(*)
+		FROM user
+		WHERE id = #{id}
+		AND email = #{email}
+	</select>
+	
+	<update id="profile">
+		update user
+		<set>
+			<if test="nick != null">nick = #{nick},</if>
+			<if test='bfname != null  and !bfname.equals("")'>
+				bfname = #{bfname},
+				bpname = #{bpname},
+			</if>			
+		</set>
+		where userno = #{userno}
+	</update>
+	
+	<update id="newpwOK" parameterType="map">
+		update user
+		set pw = md5(#{pw})
+		where id = #{id}
+	</update>
+</mapper>
