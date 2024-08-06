@@ -40,9 +40,10 @@ $(document).ready(function() {
                 data: formData,
                 contentType: false,
                 processData: false,
+                dataType: "text",
                 success: function(result) {
                		console.log(result);
-                	if(result == "ok") 
+                	if(result.trim() == "ok") 
                 	{
                 		console.log("success");
 	                    window.location.href = '<%=request.getContextPath()%>/user/logout.do';
